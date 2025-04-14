@@ -1,0 +1,12 @@
+{
+  "/page": "app/page.js",
+  "/record/page": "app/record/page.js",
+  "/view/page": "app/view/page.js",
+  "/analytics/page": "app/analytics/page.js",
+  "/goals/page": "app/goals/page.js",
+  "/api/hours/route": "app/api/hours/route.js",
+  "/api/hours/[date]/route": "app/api/hours/[date]/route.js",
+  "/api/goals/day/[date]/route": "app/api/goals/day/[date]/route.js",
+  "/api/goals/week/[date]/route": "app/api/goals/week/[date]/route.js",
+  "/api/hours/week/[date]/route": "app/api/hours/week/[date]/route.js"
+}
