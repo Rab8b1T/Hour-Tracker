@@ -1,34 +1,32 @@
+// components/CategoryList.js
 import { SECTION_CATEGORIES } from '@/lib/constants';
 
 export default function CategoryList({ records }) {
-  if (!records || records.length === 0) {
-    return (
-      <div className="text-center p-6 text-text-secondary italic bg-background-elevated rounded-md border border-dashed border-border-primary">
-        <p>No data available to display.</p>
-      </div>
-    );
-  }
-
   // Group records by category
   const categorySections = {};
   let totalHours = 0;
   
+  // Initialize all categories with empty arrays
+  Object.keys(SECTION_CATEGORIES).forEach(category => {
+    categorySections[category] = [];
+  });
+  
+  // Process records
   records.forEach(record => {
-    totalHours += record.hours;
+    if (record.hours > 0) {
+      totalHours += record.hours;
+    }
     
     // Find which category this section belongs to
     for (const [category, sections] of Object.entries(SECTION_CATEGORIES)) {
       if (sections.includes(record.section)) {
-        if (!categorySections[category]) {
-          categorySections[category] = [];
-        }
         categorySections[category].push(record);
         break;
       }
     }
   });
 
-  // Define border colors for categories (will cycle through these colors)
+  // Define border colors for categories
   const borderColors = [
     'border-primary-500',
     'border-secondary-500',
@@ -44,7 +42,7 @@ export default function CategoryList({ records }) {
         {Object.entries(categorySections).map(([category, categoryRecords], index) => {
           // Calculate total hours for this category
           const categoryHours = categoryRecords.reduce((sum, record) => sum + record.hours, 0);
-          const percentage = ((categoryHours / totalHours) * 100).toFixed(1);
+          const percentage = totalHours > 0 ? ((categoryHours / totalHours) * 100).toFixed(1) : '0.0';
           
           // Create section names string
           const sectionNames = categoryRecords.map(record => 
@@ -63,7 +61,7 @@ export default function CategoryList({ records }) {
                 {category}: {categoryHours.toFixed(1)}h ({percentage}%)
               </span>
               <span className="block text-text-secondary text-sm">
-                {sectionNames}
+                {sectionNames || 'No hours recorded'}
               </span>
             </li>
           );

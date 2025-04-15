@@ -46,33 +46,28 @@ export async function POST(request) {
     });
     
     if (hourRecord) {
-      // Update existing record
+      console.log(`Updating existing record for date ${date}`);
+      
+      // Clear existing records and replace with new ones
+      hourRecord.records = [];
+      
+      // Add all new records
       for (const newRecord of records) {
-        const existingRecordIndex = hourRecord.records.findIndex(
-          r => r.section === newRecord.section
-        );
-        
-        if (existingRecordIndex !== -1) {
-          hourRecord.records[existingRecordIndex].hours = newRecord.hours;
-        } else {
-          hourRecord.records.push(newRecord);
-        }
+        hourRecord.records.push(newRecord);
       }
       
-      // Ensure "Nothing" category is updated correctly
+      // Update "Nothing" category automatically
       const totalHoursExcludingNothing = hourRecord.records.reduce((total, record) => {
         return record.section !== 'Nothing' ? total + record.hours : total;
       }, 0);
       
       const remainingHours = Math.max(0, 24 - totalHoursExcludingNothing);
       
-      const nothingRecordIndex = hourRecord.records.findIndex(
-        r => r.section === 'Nothing'
-      );
+      // Remove any existing "Nothing" record
+      hourRecord.records = hourRecord.records.filter(r => r.section !== 'Nothing');
       
-      if (nothingRecordIndex !== -1) {
-        hourRecord.records[nothingRecordIndex].hours = remainingHours;
-      } else if (remainingHours > 0) {
+      // Add new "Nothing" record if there are remaining hours
+      if (remainingHours > 0) {
         hourRecord.records.push({
           section: 'Nothing',
           hours: remainingHours
@@ -80,8 +75,10 @@ export async function POST(request) {
       }
       
       await hourRecord.save();
+      console.log(`Updated record saved successfully for date ${date}`);
     } else {
-      // Create new record
+      console.log(`Creating new record for date ${date}`);
+      // Create new record - unchanged from your original code
       const totalHoursExcludingNothing = records.reduce((total, record) => {
         return record.section !== 'Nothing' ? total + record.hours : total;
       }, 0);
@@ -104,11 +101,12 @@ export async function POST(request) {
       });
       
       await hourRecord.save();
+      console.log(`New record saved successfully for date ${date}`);
     }
     
     return NextResponse.json(hourRecord);
   } catch (error) {
-    console.error('Error in POST /api/hours:', error);
+    console.error(`Error in POST /api/hours:`, error);
     return NextResponse.json(
       { error: 'Server Error', message: error.message },
       { status: 500 }

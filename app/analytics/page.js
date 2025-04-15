@@ -177,7 +177,7 @@ export default function AnalyticsPage() {
         <DatePicker
           initialDate={dayDate}
           onChange={setDayDate}
-          max={getCurrentDate()}
+          allowFutureDates={true}
         />
 
         <div className="bg-background-card p-6 rounded-md shadow-md border border-border-primary">

@@ -329,7 +329,7 @@ export default function GoalsPage() {
           <DatePicker
             initialDate={dayDate}
             onChange={setDayDate}
-            max={getCurrentDate()}
+            allowFutureDates={true}
           />
 
           {dayMessage.message && (

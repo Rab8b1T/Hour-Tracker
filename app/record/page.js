@@ -28,7 +28,25 @@ export default function RecordPage() {
       
       if (response.ok) {
         const data = await response.json();
-        setRecords(data.records || []);
+        
+        // Get existing records
+        const existingRecords = data.records || [];
+        
+        // Create a map of all sections with 0 hours
+        const allSectionsMap = ALL_SECTIONS.reduce((map, section) => {
+          map[section] = { section, hours: 0 };
+          return map;
+        }, {});
+        
+        // Update the map with existing record data
+        existingRecords.forEach(record => {
+          allSectionsMap[record.section] = record;
+        });
+        
+        // Convert map back to array
+        const completeRecords = Object.values(allSectionsMap);
+        
+        setRecords(completeRecords);
       } else {
         // If 404, pre-populate with default values
         if (response.status === 404) {
@@ -47,16 +65,17 @@ export default function RecordPage() {
 
   // Pre-populate all sections with 0 hours
   const prepopulateAllSections = () => {
-    const newRecords = activeSections.map(section => ({
+    // Start with ALL sections from the constants file
+    const newRecords = ALL_SECTIONS.map(section => ({
       section,
       hours: 0
     }));
     
-    // Add "Nothing" with 24 hours
-    newRecords.push({
-      section: 'Nothing',
-      hours: 24
-    });
+    // Adjust "Nothing" to have remaining hours (24)
+    const nothingIndex = newRecords.findIndex(record => record.section === 'Nothing');
+    if (nothingIndex !== -1) {
+      newRecords[nothingIndex].hours = 24;
+    }
     
     setRecords(newRecords);
   };
@@ -97,9 +116,9 @@ export default function RecordPage() {
     setStatusMessage({ type: '', message: '' });
     
     try {
-      // Filter out "Nothing" section and zero-hour records
+      // Include all records except "Nothing" which is calculated automatically
       const recordsToSubmit = records
-        .filter(record => record.section !== 'Nothing' && record.hours > 0);
+        .filter(record => record.section !== 'Nothing');
       
       const response = await fetch('/api/hours', {
         method: 'POST',
@@ -185,7 +204,7 @@ export default function RecordPage() {
       <DatePicker
         initialDate={selectedDate}
         onChange={setSelectedDate}
-        max={getCurrentDate()}
+        allowFutureDates={true}
       />
 
       <div className="bg-gray-800/70 backdrop-blur-sm p-6 rounded-lg shadow-lg border border-gray-700/50 mb-8">
